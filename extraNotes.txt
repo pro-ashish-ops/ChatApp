@@ -1,0 +1,3 @@
+The break-all class in Tailwind CSS is used to allow text to break at any character point within its container, ensuring that long words or strings do not overflow
+rounded-br-none removes the border radius from the bottom-right corner. And rounded-bl-none removes the border radius from the bottom-left corner.
+To achieve the effect of hiding an element on screens smaller than the md breakpoint and showing it on md and larger screens in Tailwind CSS, you can use the max-md:hidden utility.
