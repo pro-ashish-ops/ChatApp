@@ -1,7 +1,7 @@
 import Message from "../models/message.js";
 import User from "../models/user.js";
 import cloudinary from "../lib/cloudinary.js";
-import { io, usersocketMap } from "../server.js";
+import { io, userSocketMap } from "../server.js";
 
 //Get all users except the logged in user
 export const getUsersForSidebar = async (req, res) => {
@@ -24,14 +24,15 @@ export const getUsersForSidebar = async (req, res) => {
             unseenMessages
         });
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        console.error(error.message);
+        res.json({success:false, message:error.message });
     }
 };
 
 // get all messages for selected user
 export const getMessages = async (req, res) => {
     try {
-        const { _id: selectedUserId } = req.params;
+        const { id: selectedUserId } = req.params;
         const myId = req.user._id;
 
         const messages = await Message.find({
@@ -49,7 +50,8 @@ export const getMessages = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        console.log(error.message);
+        res.json({success:false, message:error.message });
     }
 };
 
@@ -58,12 +60,13 @@ export const getMessages = async (req, res) => {
 export const markMessageAsSeen = async (req, res) => {
     try {
         const { id } = req.params;
-        await Message.findByIdAndUpdate(id, { seen: true }, { new: true });
+        await Message.findByIdAndUpdate(id, { seen: true });
         res.json({
             success: true,
         });
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        console.error(error.message);
+        res.json({success:false, message:error.message });
     }
 };
 
@@ -88,18 +91,19 @@ export const sendMessage = async (req, res) => {
         });
 
         // Emit the new message to the receiver's socket
-        const receiverSocketId = usersocketMap[receiverId];
+        const receiverSocketId = userSocketMap[receiverId];
         if (receiverSocketId) {
             io.to(receiverSocketId).emit("newMessage", {
                 newMessage
             });
         }
 
-        res.status(201).json({
+        res.json({
             success: true,
             message: newMessage
         });
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        console.error(error.message);
+        res.json({success:false, message:error.message });
     }
 };

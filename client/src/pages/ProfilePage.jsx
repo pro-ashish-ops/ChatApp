@@ -1,17 +1,31 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import assets from '../assets/assets';
+import { AuthContext } from '../../context/AuthContext';
 
 function ProfilePage() {
 
+  const { authUser, updateProfile } = useContext(AuthContext);
+
   const navigate = useNavigate();
   const [selectedImg, setSelectedImg] = React.useState(null);
-  const [username, setUsername] = React.useState("Martin Johnson");
-  const [bio, setBio] = React.useState("Hi, I am Martin Johnson, a software engineer with a passion for building web applications. I love coding and exploring new technologies.");
+  const [name, setName] = useState(authUser.fullName);
+  const [bio, setBio] = useState(authUser.bio);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/");
+    if(!selectedImg) {
+      await updateProfile({ fullName: name, bio });
+      navigate("/");
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(selectedImg);
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      await updateProfile({ fullName: name, bio, profilePic: base64Image });
+      navigate("/");
+    }
   }
 
   return (
@@ -22,13 +36,13 @@ function ProfilePage() {
           <label htmlFor="avatar" className='flex items-center gap-3 cursor-pointer'>
             <input onChange={(e) => setSelectedImg(e.target.files[0])} type="file" id="avatar" accept='.png, .jpg, .jpeg' hidden/>
           <img src={selectedImg ? URL.createObjectURL(selectedImg) : assets.avatar_icon} alt="" className={`w-12 h-12 ${selectedImg && "rounded-full"}`}/>
-            upload profile image
+           <input type="text" required placeholder='Your Name'  className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500' value={name} onChange={(e) => setName(e.target.value)} />
            </label>
-           <input type="text" required placeholder='Your Name'  className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500' value={username} onChange={(e) => setUsername(e.target.value)} />
+           <input type="text" required placeholder='Your Name'  className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500' value={name} onChange={(e) => setName(e.target.value)} />
            <textarea required placeholder='Your Bio' className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 ' value={bio} onChange={(e) => setBio(e.target.value)} rows={4} />
             <button type='submit' className='bg-gradient-to-r from-purple-400 to-violet-600 text-white border-none rounded-full cursor-pointer p-2 text-lg'>Save</button>
         </form>
-          <img src={assets.logo_icon} alt="" className='max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10'/>
+          <img src={authUser?.profilePic || assets.logo_icon} alt="" className={`max-w-44 aspect-square rounded-full mx-10 max-sm:mt-10  ${selectedImg && "rounded-full"}`}/>
 
       </div>
     </div>

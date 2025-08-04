@@ -1,15 +1,19 @@
-import { generateToken } from "../lib/utils.js";
+import cloudinary from "../lib/cloudinary.js";
+import { generateToken } from "../lib/utils.js"; 
 import User from "../models/user.js";
 import bcrypt from "bcryptjs";
-import cloudinary from "../lib/cloudinary.js";
 
 //signup a new user
 export const signup = async (req,res)=>{
+    console.log("📥 Signup endpoint hit:", req.body);
     const {fullName,email,password,bio} = req.body;
 
     try {
-        if(!fullName || !email || !passwod || !bio){
-            return res.json({success:fals, message:"Misssing Details"})
+        console.log("Signup request body:", req.body);
+        if(!fullName || !email || !password || !bio){   
+            console.log("Signup req.body:", req.body);
+
+            return res.json({success:false, message:"Missing Details"})
         }
         const user = await User.findOne({email});
 
@@ -37,16 +41,20 @@ export const signup = async (req,res)=>{
         });
 
     } catch (error) {
-        return res.json({success:false, message:"Internal Server Error",error:error.message});
+        console.error("Error in signup:", error.message);
+        return res.json({success:false, message:error.message});
     }
 }
 
 
-//login a user
+// Controller to login a new user
 export const login = async (req,res)=>{
     try{
         const {email,password} = req.body;
         const userData = await User.findOne({email});
+        // if (!userData) {
+        //     return res.json({success:false, message:"Invalid Credentials"});
+        // }
         const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
         if(!isPasswordCorrect){
@@ -59,34 +67,34 @@ export const login = async (req,res)=>{
             success:true,
             userData,
             token,
-            message:"Login successful"
+            message:"Login Successful"
         });
 
     } catch (error) {
-        return res.json({success:false, message:"Internal Server Error", error:error.message});
+        console.error("Error in login:", error.message);
+        return res.json({success:false, message:error.message});
     }
 }
 
-// controller tocheck if user is authenticated
+// controller to check if user is authenticated
 export const checkAuth = async (req, res) => {
-    res,json({success:true, user:req.user});
+    res.json({success:true, user:req.user});
 };
 
 // controller to update user profile details
 export const updateProfile = async (req, res) => {
-
     try {
-        const { fullName, email, bio } = req.body;
+        const { fullName, bio, profilePic } = req.body;
         const userId = req.user._id;
 
         let updatedUser;
 
         if(!profilePic) {
-        updatedUser = await User.findByIdAndUpdate(userId, {
-            fullName,
-            bio
-        }, { new: true });
-        }else {
+            updatedUser = await User.findByIdAndUpdate(userId, {
+                fullName,
+                bio
+            }, { new: true });
+        } else {
             const upload = await cloudinary.uploader.upload(profilePic);
             updatedUser = await User.findByIdAndUpdate(userId, {
                 fullName,
@@ -97,6 +105,7 @@ export const updateProfile = async (req, res) => {
 
         res.json({ success: true, user: updatedUser });
     } catch (error) {
-        return res.json({ success: false, message: "Internal Server Error", error: error.message });
+        console.log(error.message)
+        return res.json({ success: false, message:error.message });
     }
 };
