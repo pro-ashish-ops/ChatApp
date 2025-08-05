@@ -17,6 +17,8 @@ const server = http.createServer(app); // we are using http.createServer as sock
 export const io = new Server(server, {
     cors: {
         origin: "*"
+        ,
+    credentials: true// changed for error
     }
 });
 
@@ -32,6 +34,14 @@ io.on("connection", (socket) => {
 
     // if(userId)userSocketMap[userId] = socket.id; 
     if (userId) userSocketMap[String(userId)] = socket.id;// changed for error
+
+    // socket.on("sendMessage", (message) => {
+    //     const receiverSocketId = userSocketMap[message.receiverId];
+    //     console.log(`Forwarding message to: ${receiverSocketId}`);
+    //     if (receiverSocketId) {
+    //         io.to(receiverSocketId).emit("newMessage", message);
+    //     }
+    // }); // changed for error
 
 
 

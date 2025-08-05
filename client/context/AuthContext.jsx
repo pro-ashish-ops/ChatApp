@@ -39,8 +39,9 @@ export const AuthProvider = ({ children })=> {
 
     const login = async (state, credentials) => {
         try {
-            console.log("Sending signup data:", data);
+            
             const { data } = await axios.post(`/api/auth/${state}`, credentials);
+            console.log("Sending signup data:", data);
             if (data.success) {
                 setAuthUser(data.userData);
                 connectSocket(data.userData);
@@ -104,6 +105,7 @@ export const AuthProvider = ({ children })=> {
         newSocket.on("getOnlineUsers", (userIds) => {
             setOnlineUsers(userIds);
         });
+        
     }
 
     useEffect(()=>{
