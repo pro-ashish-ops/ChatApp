@@ -36,7 +36,7 @@ const ChatContainer = () => {
     const reader = new FileReader();
     reader.onloadend = async () => {
       await sendMessage({image: reader.result});
-      e.target.value = null; // reset the input value
+      e.target.value = ""; // reset the input value
     }
     reader.readAsDataURL(file);
   }

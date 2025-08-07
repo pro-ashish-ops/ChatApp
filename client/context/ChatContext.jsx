@@ -91,6 +91,12 @@ export const ChatProvider = ({ children }) => {
         }
     },[socket, selectedUser])
 
+    useEffect(() => {
+    if (selectedUser?._id) {
+        getMessages(selectedUser._id);
+    }
+}, [selectedUser]);
+
 
     const value = {
         messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, unseenMessages, setUnseenMessages
